@@ -1,0 +1,101 @@
+
+
+Using OAI-PMH to populate the "Catholic Portal" is not straight-forward
+
+Using OAI-PMH to populate the "Catholic Portal" is not straight-forward, and this posting outlines some of my investigations in this regard.
+
+
+Introduction
+
+As you may or may not know, OAI-PMH is a "standard" protocol designed for harvesting metadata. [1] It only understands six commands (or in OAI-PMH parlance, "verbs"). These commands are sent to remote computers in the form of URLs, and the remote computer is expected to respond in the form of specifically shaped XML streams. These commands include:
+
+  * Identify - Lists who manages the repository and what type of
+    content it contains.
+  
+  * ListMetadataFormats - Lists the various metadata schemes used
+    to describe the repository's content. At least one of these
+    schemes must be Dublin Core.
+  
+  * ListSets - Specifies how the repository's content is
+    subdivided. There can be zero or more of these subdivisions.
+   
+  * ListIdentifiers - Returns a list of keys pointing to specific
+    records in the repository.
+  
+  * ListRecords - An enhanced version of ListIdentifiers, this verb
+    downloads whole records, not just identifiers.
+  
+  * GetRecord - Given a specific identifier, this verb retrieves a
+    single record.
+  
+Through a conversation of these verbs and the returned XML streams, metadata between computers can be exchanged. It is then up to the computer doing the harvesting to implement some sort of cool and interesting service with the harvested content. Here at Catholic Portal Central we want to index the metadata and provide immediate access to remote digitized content.
+
+
+Investigations
+
+At least three Catholic Research Resources Alliance (CRRA) members have OAI-PMH repositories: Duquesne University, Boston College, and Loyola University Chicago. Using a little Perl script, I most recently investigated the content of the repositories of Boston College and Loyola University Chicago. Through this process I learned what metadata formats they supported, what sets were used to subdivided their collections, and output Dublin Core metadata from a few selected sets. 
+
+The harvested Dublin Core metadata was typical of OAI-PMH repositories: thin, a bit ambiguous, and somewhat inconsistant across repositories. It was thin because many of the Dublin Core elements are left unpopulated. It is ambiguous because many of the fields are repeated, and the values of repeated elements are of different types. For example, a description field may be empty, contain an abstract of the work, the full text of the work, or the process used to digitize the material. It is inconsistant because things like dates, names, and subject entries are formatted differently. In some places names are listed in first name/last name order. Other times it is last name/first name order. Dates can be anything from "February 12, 2012" to "2012-02-12" to "Twelfth Century". None of this is new the world of OAI-PMH. It is typical. 
+
+All is not lost. There are patterns to this apparent randomness. Using my script I can sometimes output titles, descriptions, subject headings, and URLs of digitized objects. For example, here is such a list from the Loyola University Chicago repository:
+
+            item: 46
+             key: oai:content.library.luc.edu:coll6/45
+        title(s): Letter to the Secretary of the Literary Agency of London, 1908
+        title(s): Catholic Women Poets
+   identifier(s): cudahy219e3
+   identifier(s): 003_kayesmith_1908;pg3.jpg
+   identifier(s): http://content.library.luc.edu/u?/coll6,45
+      subject(s): Shelia Kaye-Smith; poets; women poets; Catholic poets
+      subject(s): Local
+  description(s): third page of letter requesting appointment
+  description(s): does not suit you any other time up to 4 15 will do Would you kindly send a reply to me c o Miss F E Walters Girton College Cambridge With apologies for troubling you believe me Yours faithfully Sheila Kaye Smith 
+  description(s): Master file scanned at 600 dpi RGB in reflective mode from original document using MicroTek ScanMaker 1000XL 
+  description(s): http://www.luc.edu.archives
+            type: image
+
+            item: 47
+             key: oai:content.library.luc.edu:coll6/46
+        title(s): Letter to the Secretary of the Literary Agency of London, 1908
+        title(s): Catholic Women Poets
+   identifier(s): cudahy21912e3
+   identifier(s): 001_kayesmith_1908
+   identifier(s): http://content.library.luc.edu/u?/coll6,46
+      subject(s): Shelia Kaye-Smith; poets; women poets; Catholic poets
+      subject(s): Local
+  description(s): Letter requesting an appointment to discuss her story The Tramping Methodist and future plans 
+  description(s): Master file scanned at 600 dpi RGB in reflective mode from original document using MicroTek ScanMaker 1000XL 
+  description(s): http://www.luc.edu.archives
+            type: image
+
+            item: 48
+             key: oai:content.library.luc.edu:coll6/47
+        title(s): Louise Imogen Guiney and Alice Brown
+        title(s): Catholic Women Poets
+   identifier(s): cudahy21912e3
+   identifier(s): 001_lguiney_and_abronw,1899.jpg
+   identifier(s): http://content.library.luc.edu/u?/coll6,47
+      subject(s): Louise Imogen Guiney; Alice Brown; poets; women poets; Catholic poets
+      subject(s): Local
+  description(s): Poets Louise Imogen Guiney and Alice Brown sitting on front steps of a house 
+  description(s): Master file scanned at 600 dpi RGB in reflective mode from original photograph using MicroTek ScanMaker 1000XL 
+  description(s): http://www.luc.edu.archives
+            type: image
+
+From this output it becomes apparent that the first title is the title of the artifact, the third identifier is the URL of the digitized object, the first subject field is a delimited list of keywords, the first description is a sort of abstract, and the type field contains a value denoting what kind of digitized thing is in question. Thus, the output follows a pattern, and computers are very good at patterns, therefore a computer program could easily be written to read this particular OAI-PMH output and stored in the Portal's index.
+
+
+Next steps
+
+My next steps are two-fold. First, I will harvest and index some of the metadata from selected Loyola University Chicago OAI-PMH sets. Second, I will let colleagues from various CRRA committees (specifically the Digital Access Committee as well as the Collection Committee) peruse the results. In the end I hope to get feedback on how to proceed. Should I index more content? Less? None? If more, then how should records be displayed, and exactly how ought the Dublin Core metadata be mapped to VuFind's underlying Solr index fields?
+
+All of this work is entirely feasible. At the same time it is not enormously scalable. Hand-crafting the parsing of OAI-PMH output, and handcrafting how it all gets mapped to Solr's index is time consuming and fragile. The Portal Home Planet can easily do this work for no more than a dozen different repositories, but after that some other means of production will need to be examined. 
+
+
+Links
+
+[1] OAI-PMH - http://www.openarchives.org/OAI/openarchivesprotocol.html
+
+-- 
+Eric Lease Morgan
+May 14, 2012
